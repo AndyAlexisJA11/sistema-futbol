@@ -8,6 +8,8 @@ import com.andyjimenez.sistemafutbol.tournament.Torneo;
 import com.andyjimenez.sistemafutbol.tournament.TorneoService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ParticipacionTorneoService {
 
@@ -49,13 +51,37 @@ public class ParticipacionTorneoService {
         return convertirAResponse(participacionGuardada);
     }
 
-    private ParticipacionTorneoResponse convertirAResponse(ParticipacionTorneo participacion){
+    public ParticipacionTorneoResponse convertirAResponse(ParticipacionTorneo participacion){
 
         return new ParticipacionTorneoResponse(
                 participacion.getIdParticipacion(),
                 participacion.getTorneo().getIdTorneo(),
                 participacion.getEquipo().getIdEquipo());
     }
+
+    public List<ParticipacionTorneoResponse> listarTodas(){
+        return participacionTorneoRepository.findAll()
+                .stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public ParticipacionTorneo buscarParticipaconPorId(Long id){
+        return participacionTorneoRepository.findById(id)
+                .orElseThrow(() -> new ParticipacionNoEncontradaException(id));
+    }
+
+    public ParticipacionTorneoResponse obtenerPorId(Long id){
+        ParticipacionTorneo participacion = buscarParticipaconPorId(id);
+        return convertirAResponse(participacion);
+    }
+
+    public void elimimar(Long id){
+        ParticipacionTorneo participacionExistente = buscarParticipaconPorId(id);
+        participacionTorneoRepository.delete(participacionExistente);
+    }
+
+
 
 
 }
