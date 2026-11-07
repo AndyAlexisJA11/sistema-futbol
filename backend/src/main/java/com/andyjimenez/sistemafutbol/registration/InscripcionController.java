@@ -5,6 +5,8 @@ import com.andyjimenez.sistemafutbol.registration.dto.InscripcionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/inscripciones")
 public class InscripcionController {
@@ -20,4 +22,31 @@ public class InscripcionController {
     public InscripcionResponse guardar(@RequestBody InscripcionRequest request){
         return inscripcionService.guardar(request);
     }
+
+    @GetMapping
+    public List<InscripcionResponse> listar(){
+        return inscripcionService.listarTodos();
+    }
+
+    @GetMapping("/{id}")
+    public InscripcionResponse buscarPorId(@PathVariable Long id){
+        return inscripcionService.buscarPorId(id);
+    }
+
+    @PutMapping("/{id}/enviar")
+    public InscripcionResponse enviar(@PathVariable Long id){
+        return inscripcionService.enviar(id);
+    }
+
+    @PutMapping("/{id}/aprobar")
+    public InscripcionResponse aprobar(@PathVariable Long id){
+        return inscripcionService.aprobar(id);
+    }
+
+    @PutMapping("/{id}/rechazar")
+    public InscripcionResponse rechazar(@PathVariable Long id){
+        return inscripcionService.rechazar(id);
+    }
+
+
 }

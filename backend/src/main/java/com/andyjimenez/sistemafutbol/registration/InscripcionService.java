@@ -11,6 +11,8 @@ import com.andyjimenez.sistemafutbol.tournament.Torneo;
 import com.andyjimenez.sistemafutbol.tournament.TorneoService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class InscripcionService {
 
@@ -56,4 +58,72 @@ public class InscripcionService {
         inscripcion.getTorneo().getIdTorneo(),
         inscripcion.getEstado());
     }
+
+    public List<InscripcionResponse> listarTodos(){
+        return inscripcionRepository.findAll()
+                .stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public Inscripcion buscarInscripcionPorId(Long id){
+        return inscripcionRepository.findById(id)
+                .orElseThrow(() -> new InscripcionNoEncontradaException(id));
+    }
+
+    public InscripcionResponse buscarPorId(Long id){
+        Inscripcion inscripcionEncontrada = buscarInscripcionPorId(id);
+
+        return convertirAResponse(inscripcionEncontrada);
+    }
+
+    public InscripcionResponse enviar(Long id){
+        Inscripcion inscripcion = buscarInscripcionPorId(id);
+
+        if (inscripcion.getEstado() != EstadoInscripcion.BORRADOR){
+            throw new EstadoInscripcionInvalidoException(
+                    "Solo se puede enviar una inscripcion en estado BORRADOR"
+            );
+        }
+
+        inscripcion.setEstado(EstadoInscripcion.ENVIADA);
+
+        Inscripcion inscripcionActualizada = inscripcionRepository.save(inscripcion);
+
+        return convertirAResponse(inscripcionActualizada);
+    }
+
+    public InscripcionResponse aprobar(Long id){
+        Inscripcion inscripcion = buscarInscripcionPorId(id);
+
+        if (inscripcion.getEstado() != EstadoInscripcion.ENVIADA){
+            throw new EstadoInscripcionInvalidoException(
+                    "solo se puede aprobar una inscripcion en estado ENVIADA"
+            );
+        }
+
+        inscripcion.setEstado(EstadoInscripcion.APROBADA);
+
+        Inscripcion inscripcionActualizada = inscripcionRepository.save(inscripcion);
+
+        return convertirAResponse(inscripcionActualizada);
+    }
+
+    public InscripcionResponse rechazar(Long id){
+        Inscripcion inscripcion = buscarInscripcionPorId(id);
+
+        if (inscripcion.getEstado() != EstadoInscripcion.ENVIADA){
+            throw new EstadoInscripcionInvalidoException(
+                    "Solo se puede rechazar una inscripcion en estado ENVIDA"
+            );
+        }
+
+        inscripcion.setEstado(EstadoInscripcion.RECHAZADA);
+
+        Inscripcion inscripcionActualizada = inscripcionRepository.save(inscripcion);
+
+        return convertirAResponse(inscripcionActualizada);
+    }
+
+
 }
