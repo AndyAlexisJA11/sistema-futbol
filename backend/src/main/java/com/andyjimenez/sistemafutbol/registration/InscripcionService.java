@@ -1,11 +1,14 @@
 package com.andyjimenez.sistemafutbol.registration;
 
+import com.andyjimenez.sistemafutbol.participation.ParticipacionTorneo;
+import com.andyjimenez.sistemafutbol.participation.ParticipacionTorneoRepository;
 import com.andyjimenez.sistemafutbol.player.Jugador;
 import com.andyjimenez.sistemafutbol.player.JugadorDuplicadoException;
 import com.andyjimenez.sistemafutbol.player.JugadorService;
 import com.andyjimenez.sistemafutbol.registration.dto.InscripcionRequest;
 import com.andyjimenez.sistemafutbol.registration.dto.InscripcionResponse;
 import com.andyjimenez.sistemafutbol.team.Equipo;
+import com.andyjimenez.sistemafutbol.team.EquipoNoEncontradoException;
 import com.andyjimenez.sistemafutbol.team.EquipoService;
 import com.andyjimenez.sistemafutbol.tournament.Torneo;
 import com.andyjimenez.sistemafutbol.tournament.TorneoService;
@@ -20,18 +23,42 @@ public class InscripcionService {
     private final JugadorService jugadorService;
     private final EquipoService equipoService;
     private final TorneoService torneoService;
+    private final ParticipacionTorneoRepository participacionTorneoRepository;
 
-    public InscripcionService(InscripcionRepository inscripcionRepository, JugadorService jugadorService, EquipoService equipoService, TorneoService torneoService) {
+    public InscripcionService(InscripcionRepository inscripcionRepository, JugadorService jugadorService, EquipoService equipoService, TorneoService torneoService, ParticipacionTorneoRepository participacionTorneoRepository) {
         this.inscripcionRepository = inscripcionRepository;
         this.jugadorService = jugadorService;
         this.equipoService = equipoService;
         this.torneoService = torneoService;
+        this.participacionTorneoRepository = participacionTorneoRepository;
     }
 
     public InscripcionResponse guardar(InscripcionRequest request){
 
         if (inscripcionRepository.existsByJugador_IdJugadorAndTorneo_IdTorneo(request.getIdJugador(), request.getIdTorneo())){
             throw new InscripcionDuplicadaException(request.getIdJugador(), request.getIdTorneo());
+        }
+
+        if (!participacionTorneoRepository.existsByTorneo_IdTorneoAndEquipo_IdEquipo(
+                request.getIdTorneo(),
+                request.getIdEquipo())){
+            throw new EquipoNoParticipaEnTorneoException(
+                    request.getIdEquipo(),
+                    request.getIdTorneo()
+            );
+        }
+
+        long cantidadJugadores = inscripcionRepository.countByEquipo_IdEquipoAndTorneo_IdTorneoAndEstadoNot(
+                request.getIdEquipo(),
+                request.getIdTorneo(),
+                EstadoInscripcion.RECHAZADA
+        );
+
+        if (cantidadJugadores >= 24){
+            throw new LimiteJugadoresException(
+                    request.getIdEquipo(),
+                    request.getIdTorneo()
+            );
         }
 
         Jugador jugador = jugadorService.buscarJugadorPorId(request.getIdJugador());
@@ -43,7 +70,7 @@ public class InscripcionService {
         inscripcion.setJugador(jugador);
         inscripcion.setEquipo(equipo);
         inscripcion.setTorneo(torneo);
-        inscripcion.setEstado(request.getEstado());
+        inscripcion.setEstado(EstadoInscripcion.BORRADOR);
 
         Inscripcion inscripcionGuardada = inscripcionRepository.save(inscripcion);
 
@@ -124,6 +151,8 @@ public class InscripcionService {
 
         return convertirAResponse(inscripcionActualizada);
     }
+
+
 
 
 }

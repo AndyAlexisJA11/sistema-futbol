@@ -14,8 +14,6 @@ public class InscripcionRequest {
     @NotNull
     private Long idTorneo;
 
-    @NotNull
-    private EstadoInscripcion estado;
 
     public Long getIdJugador() {
         return idJugador;
@@ -41,11 +39,4 @@ public class InscripcionRequest {
         this.idTorneo = idTorneo;
     }
 
-    public EstadoInscripcion getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoInscripcion estado) {
-        this.estado = estado;
-    }
 }
