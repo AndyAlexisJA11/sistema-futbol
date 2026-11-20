@@ -10,6 +10,8 @@ import com.andyjimenez.sistemafutbol.team.Equipo;
 import com.andyjimenez.sistemafutbol.team.EquipoService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PartidoService {
     private final PartidoRespository partidoRespository;
@@ -74,5 +76,39 @@ public class PartidoService {
                 partido.getEstado(),
                 partido.getGolesLocal(),
                 partido.getGolesVisitante());
+    }
+
+    public List<PartidoResponse> listarTodos(){
+        return partidoRespository.findAll()
+                .stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public Partido buscarPartidoPorId(Long id){
+        return partidoRespository.findById(id).orElseThrow(() -> new PartidoNoEncontradoException(id));
+    }
+
+    public PartidoResponse buscarPorId(Long id){
+        Partido partido = buscarPartidoPorId(id);
+        return convertirAResponse(partido);
+    }
+
+    public PartidoResponse registrarResultado(Long id, RestultadoPartidoRequest request){
+        Partido partido = buscarPartidoPorId(id);
+
+        if (partido.getEstado() != EstadoPartido.PROGRAMADO){
+            throw new EstadoPartidoInvalidoException(
+                    "Solo se puede registar en un partido PROGRAMADO"
+            );
+        }
+
+        partido.setGolesLocal(request.getGolesLocal());
+        partido.setGolesVisitante(request.getGolesVisitante());
+        partido.setEstado(EstadoPartido.JUGADO);
+
+        Partido partidoActualizado = partidoRespository.save(partido);
+
+        return convertirAResponse(partidoActualizado);
     }
 }
