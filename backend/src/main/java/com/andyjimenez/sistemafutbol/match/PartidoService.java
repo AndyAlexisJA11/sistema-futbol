@@ -1,5 +1,8 @@
 package com.andyjimenez.sistemafutbol.match;
 
+import com.andyjimenez.sistemafutbol.correction.CorreccionResultado;
+import com.andyjimenez.sistemafutbol.correction.CorreccionResultadoRepository;
+import com.andyjimenez.sistemafutbol.correction.dto.CorreccionResultadoRequest;
 import com.andyjimenez.sistemafutbol.match.dto.PartidoRequest;
 import com.andyjimenez.sistemafutbol.match.dto.PartidoResponse;
 import com.andyjimenez.sistemafutbol.matchday.Jornada;
@@ -10,6 +13,7 @@ import com.andyjimenez.sistemafutbol.team.Equipo;
 import com.andyjimenez.sistemafutbol.team.EquipoService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -18,15 +22,18 @@ public class PartidoService {
     private final JornadaService jornadaService;
     private final EquipoService equipoService;
     private final ParticipacionTorneoRepository participacionTorneoRepository;
+    private final CorreccionResultadoRepository correccionResultadoRepository;
 
     public PartidoService(PartidoRespository partidoRespository,
                           JornadaService jornadaService,
                           EquipoService equipoService,
-                          ParticipacionTorneoRepository participacionTorneoRepository) {
+                          ParticipacionTorneoRepository participacionTorneoRepository,
+                          CorreccionResultadoRepository correccionResultadoRepository) {
         this.partidoRespository = partidoRespository;
         this.jornadaService = jornadaService;
         this.equipoService = equipoService;
         this.participacionTorneoRepository = participacionTorneoRepository;
+        this.correccionResultadoRepository = correccionResultadoRepository;
     }
 
     public PartidoResponse guardar(PartidoRequest request){
@@ -110,5 +117,37 @@ public class PartidoService {
         Partido partidoActualizado = partidoRespository.save(partido);
 
         return convertirAResponse(partidoActualizado);
+    }
+
+    public PartidoResponse corregirResultado(Long id, CorreccionResultadoRequest resultadoRequest){
+        Partido partido = buscarPartidoPorId(id);
+
+        if (partido.getEstado() != EstadoPartido.JUGADO){
+            throw new EstadoPartidoInvalidoException(
+                    "Solo se puede corregir el resultado de un partido JUGADO"
+            );
+        }
+
+        CorreccionResultado correccion = new CorreccionResultado();
+
+        correccion.setPartido(partido);
+        correccion.setGolesLocalAnterior(partido.getGolesLocal());
+        correccion.setGolesVisitanteAnterior(partido.getGolesVisitante());
+        correccion.setGolesLocalNuevo(resultadoRequest.getGolesLocal());
+        correccion.setGolesVisitaneNuevo(resultadoRequest.getGolesVisitante());
+        correccion.setMotivo(resultadoRequest.getMotivo());
+        correccion.setFechaCorreccion(LocalDateTime.now());
+
+
+        correccionResultadoRepository.save(correccion);
+
+        partido.setGolesLocal(resultadoRequest.getGolesLocal());
+        partido.setGolesVisitante(resultadoRequest.getGolesVisitante());
+
+        Partido partidoActualizado = partidoRespository.save(partido);
+
+        return convertirAResponse(partidoActualizado);
+
+
     }
 }

@@ -1,5 +1,6 @@
 package com.andyjimenez.sistemafutbol.match;
 
+import com.andyjimenez.sistemafutbol.correction.dto.CorreccionResultadoRequest;
 import com.andyjimenez.sistemafutbol.match.dto.PartidoRequest;
 import com.andyjimenez.sistemafutbol.match.dto.PartidoResponse;
 import jakarta.validation.Valid;
@@ -37,5 +38,10 @@ public class PartidoController {
     @PutMapping("/{id}/resultado")
     public PartidoResponse registrarResultado(@PathVariable Long id, @Valid @RequestBody RestultadoPartidoRequest request){
         return partidoService.registrarResultado(id, request);
+    }
+
+    @PutMapping("/{id}/corregir-resultado")
+    public PartidoResponse corregirResultado(@PathVariable Long id, @Valid @RequestBody CorreccionResultadoRequest request){
+        return partidoService.corregirResultado(id, request);
     }
 }
