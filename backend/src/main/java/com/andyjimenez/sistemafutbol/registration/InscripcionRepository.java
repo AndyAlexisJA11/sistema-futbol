@@ -17,5 +17,12 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
             EstadoInscripcion estado
     );
 
+    boolean existsByJugador_IdJugadorAndEquipo_IdEquipoAndTorneo_IdTorneoAndEstado(
+            Long idJugador,
+            Long idEquipo,
+            Long idTorneo,
+            EstadoInscripcion estado
+    );
+
 
 }
