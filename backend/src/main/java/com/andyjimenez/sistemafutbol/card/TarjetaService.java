@@ -10,6 +10,7 @@ import com.andyjimenez.sistemafutbol.player.JugadorNoPerteneceEquipoException;
 import com.andyjimenez.sistemafutbol.player.JugadorService;
 import com.andyjimenez.sistemafutbol.registration.EstadoInscripcion;
 import com.andyjimenez.sistemafutbol.registration.InscripcionRepository;
+import com.andyjimenez.sistemafutbol.sancion.SancionService;
 import com.andyjimenez.sistemafutbol.team.Equipo;
 import com.andyjimenez.sistemafutbol.team.EquipoService;
 import org.springframework.stereotype.Service;
@@ -22,18 +23,21 @@ public class TarjetaService {
     private final JugadorService jugadorService;
     private final EquipoService equipoService;
     private final InscripcionRepository inscripcionRepository;
+    private final SancionService sancionService;
 
     public TarjetaService(TarjetaRepository tarjetaRepository,
                           PartidoService partidoService,
                           JugadorService jugadorService,
                           EquipoService equipoService,
-                          InscripcionRepository inscripcionRepository) {
+                          InscripcionRepository inscripcionRepository,
+                          SancionService sancionService) {
 
         this.tarjetaRepository = tarjetaRepository;
         this.partidoService = partidoService;
         this.jugadorService = jugadorService;
         this.equipoService = equipoService;
         this.inscripcionRepository = inscripcionRepository;
+        this.sancionService = sancionService;
     }
 
     public TarjetaResponse guardar(TarjetaRequest request) {
@@ -75,6 +79,17 @@ public class TarjetaService {
             );
         }
 
+        if (request.getTipo() == TipoTarjeta.AMARILLA && tarjetaRepository.existsByPartido_IdPartidoAndJugador_IdJugadorAndTipo(
+                request.getIdPartido(),
+                request.getIdJugador(),
+                TipoTarjeta.AMARILLA
+        )){
+            throw new TarjetaDuplicadaException(
+                    request.getIdJugador(),
+                    request.getIdPartido()
+            );
+        }
+
         Tarjeta tarjeta = new Tarjeta();
 
         tarjeta.setPartido(partido);
@@ -84,6 +99,42 @@ public class TarjetaService {
 
         Tarjeta tarjetaGuardada =
                 tarjetaRepository.save(tarjeta);
+
+        if (request.getTipo() == TipoTarjeta.ROJA_DIRECTA){
+            sancionService.crearSancionAutomatica(
+                    jugador,
+                    partido.getJornada().getTorneo(),
+                    2,
+                    "Roja directa"
+            );
+        }
+
+        if (request.getTipo() == TipoTarjeta.ROJA_DOBLE_AMARILLA){
+            sancionService.crearSancionAutomatica(
+                    jugador,
+                    partido.getJornada().getTorneo(),
+                    1,
+                    "Doble amarilla"
+            );
+        }
+
+        if (request.getTipo() == TipoTarjeta.AMARILLA){
+
+            long totalAmarillas = tarjetaRepository.countByJugador_IdJugadorAndPartido_Jornada_Torneo_IdTorneoAndTipo(
+                    request.getIdJugador(),
+                    idTorneo,
+                    TipoTarjeta.AMARILLA
+            );
+
+            if (totalAmarillas % 4 == 0){
+                sancionService.crearSancionAutomatica(
+                        jugador,
+                        partido.getJornada().getTorneo(),
+                        1,
+                        "Acumulacion de " + totalAmarillas + " tarjetas amarrillas"
+                );
+            }
+        }
 
         return convertirAResponse(tarjetaGuardada);
     }
