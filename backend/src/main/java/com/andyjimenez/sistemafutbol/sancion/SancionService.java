@@ -8,6 +8,8 @@ import com.andyjimenez.sistemafutbol.tournament.Torneo;
 import com.andyjimenez.sistemafutbol.tournament.TorneoService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class SancionService {
 
@@ -65,5 +67,56 @@ public class SancionService {
         sancion.setEstado(EstadoSancion.ACTIVA);
 
         return sancionRepository.save(sancion);
+    }
+
+    public List<SancionResponse> listarTodas(){
+        return sancionRepository.findAll()
+                .stream()
+                .map(this::convertirAResponse)
+                .toList();
+    }
+
+    public Sancion buscarSancionPorId(Long id){
+        return sancionRepository.findById(id)
+                .orElseThrow(() -> new SancionNoEncontradaException(id));
+    }
+
+    public SancionResponse obtenerPorId(Long id){
+        Sancion sancion = buscarSancionPorId(id);
+        return convertirAResponse(sancion);
+    }
+
+    public SancionResponse marcarCumplida(Long id){
+
+        Sancion sancion = buscarSancionPorId(id);
+
+        if (sancion.getEstado() != EstadoSancion.ACTIVA){
+            throw new EstadoSancionInvalidoException(
+                    "Solo una sancion ACTIVA puede marcarse como cumplida"
+            );
+        }
+
+        sancion.setEstado(EstadoSancion.CUMPLIDA);
+
+        Sancion sancionActualizada = sancionRepository.save(sancion);
+
+        return convertirAResponse(sancionActualizada);
+    }
+
+    public SancionResponse anular(Long id){
+
+        Sancion sancion = buscarSancionPorId(id);
+
+        if (sancion.getEstado() != EstadoSancion.ACTIVA){
+            throw new EstadoSancionInvalidoException(
+                    "Solo una sancion ACTIVA puede anularse"
+            );
+        }
+
+        sancion.setEstado(EstadoSancion.ANULADA);
+
+        Sancion sancionActualizada = sancionRepository.save(sancion);
+
+        return convertirAResponse(sancionActualizada);
     }
 }

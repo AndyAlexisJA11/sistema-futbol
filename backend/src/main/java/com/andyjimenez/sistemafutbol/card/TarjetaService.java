@@ -15,6 +15,8 @@ import com.andyjimenez.sistemafutbol.team.Equipo;
 import com.andyjimenez.sistemafutbol.team.EquipoService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TarjetaService {
 
