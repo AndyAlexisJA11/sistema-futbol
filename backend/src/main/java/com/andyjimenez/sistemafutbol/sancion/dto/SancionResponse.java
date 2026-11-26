@@ -9,14 +9,24 @@ public class SancionResponse {
     private Integer partidosSuspension;
     private String motivo;
     private EstadoSancion estado;
+    private Integer partidosPendientes;
 
-    public SancionResponse(Long idSancion, Long idJugador, Long idTorneo, Integer partidosSuspension, String motivo, EstadoSancion estado) {
+    public SancionResponse(Long idSancion,
+                           Long idJugador,
+                           Long idTorneo,
+                           Integer partidosSuspension,
+                           Integer partidosPendientes,
+                           String motivo,
+                           EstadoSancion estado)
+                            {
         this.idSancion = idSancion;
         this.idJugador = idJugador;
         this.idTorneo = idTorneo;
         this.partidosSuspension = partidosSuspension;
+        this.partidosPendientes = partidosPendientes;
         this.motivo = motivo;
         this.estado = estado;
+
     }
 
     public Long getIdSancion() {
@@ -41,5 +51,9 @@ public class SancionResponse {
 
     public EstadoSancion getEstado() {
         return estado;
+    }
+
+    public Integer getPartidosPendientes() {
+        return partidosPendientes;
     }
 }

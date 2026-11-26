@@ -1,5 +1,6 @@
 package com.andyjimenez.sistemafutbol.sancion;
 
+import com.andyjimenez.sistemafutbol.match.Partido;
 import com.andyjimenez.sistemafutbol.player.Jugador;
 import com.andyjimenez.sistemafutbol.tournament.Torneo;
 import jakarta.persistence.*;
@@ -21,6 +22,10 @@ public class Sancion {
     @JoinColumn(name = "id_torneo",nullable = false)
     private Torneo torneo;
 
+    @ManyToOne
+    @JoinColumn(name = "id_partido_origen")
+    private Partido partidoOrigen;
+
     @Column(name = "partidos_suspension", nullable = false)
     private Integer partidosSuspension;
 
@@ -30,6 +35,11 @@ public class Sancion {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado",nullable = false, length = 20)
     private EstadoSancion estado;
+
+    @Column(name = "partidos_pendientes", nullable = false)
+    private Integer partidosPendientes;
+
+
 
     public Sancion(){}
 
@@ -57,6 +67,14 @@ public class Sancion {
         this.torneo = torneo;
     }
 
+    public Partido getPartidoOrigen() {
+        return partidoOrigen;
+    }
+
+    public void setPartidoOrigen(Partido partidoOrigen) {
+        this.partidoOrigen = partidoOrigen;
+    }
+
     public Integer getPartidosSuspension() {
         return partidosSuspension;
     }
@@ -79,5 +97,13 @@ public class Sancion {
 
     public void setEstado(EstadoSancion estado) {
         this.estado = estado;
+    }
+
+    public Integer getPartidosPendientes() {
+        return partidosPendientes;
+    }
+
+    public void setPartidosPendientes(Integer partidosPendientes) {
+        this.partidosPendientes = partidosPendientes;
     }
 }

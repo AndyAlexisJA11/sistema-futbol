@@ -106,6 +106,7 @@ public class TarjetaService {
             sancionService.crearSancionAutomatica(
                     jugador,
                     partido.getJornada().getTorneo(),
+                    partido,
                     2,
                     "Roja directa"
             );
@@ -115,6 +116,7 @@ public class TarjetaService {
             sancionService.crearSancionAutomatica(
                     jugador,
                     partido.getJornada().getTorneo(),
+                    partido,
                     1,
                     "Doble amarilla"
             );
@@ -132,6 +134,7 @@ public class TarjetaService {
                 sancionService.crearSancionAutomatica(
                         jugador,
                         partido.getJornada().getTorneo(),
+                        partido,
                         1,
                         "Acumulacion de " + totalAmarillas + " tarjetas amarrillas"
                 );

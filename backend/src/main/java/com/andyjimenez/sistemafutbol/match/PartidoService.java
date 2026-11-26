@@ -9,6 +9,7 @@ import com.andyjimenez.sistemafutbol.matchday.Jornada;
 import com.andyjimenez.sistemafutbol.matchday.JornadaService;
 import com.andyjimenez.sistemafutbol.participation.ParticipacionTorneo;
 import com.andyjimenez.sistemafutbol.participation.ParticipacionTorneoRepository;
+import com.andyjimenez.sistemafutbol.sancion.SancionService;
 import com.andyjimenez.sistemafutbol.team.Equipo;
 import com.andyjimenez.sistemafutbol.team.EquipoService;
 import org.springframework.stereotype.Service;
@@ -23,17 +24,20 @@ public class PartidoService {
     private final EquipoService equipoService;
     private final ParticipacionTorneoRepository participacionTorneoRepository;
     private final CorreccionResultadoRepository correccionResultadoRepository;
+    private final SancionService sancionService;
 
     public PartidoService(PartidoRespository partidoRespository,
                           JornadaService jornadaService,
                           EquipoService equipoService,
                           ParticipacionTorneoRepository participacionTorneoRepository,
-                          CorreccionResultadoRepository correccionResultadoRepository) {
+                          CorreccionResultadoRepository correccionResultadoRepository,
+                          SancionService sancionService) {
         this.partidoRespository = partidoRespository;
         this.jornadaService = jornadaService;
         this.equipoService = equipoService;
         this.participacionTorneoRepository = participacionTorneoRepository;
         this.correccionResultadoRepository = correccionResultadoRepository;
+        this.sancionService = sancionService;
     }
 
     public PartidoResponse guardar(PartidoRequest request){
@@ -115,6 +119,8 @@ public class PartidoService {
         partido.setEstado(EstadoPartido.JUGADO);
 
         Partido partidoActualizado = partidoRespository.save(partido);
+
+        sancionService.procesarSancionesPorPartido(partidoActualizado);
 
         return convertirAResponse(partidoActualizado);
     }

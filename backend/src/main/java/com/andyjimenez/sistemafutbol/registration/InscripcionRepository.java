@@ -1,6 +1,7 @@
 package com.andyjimenez.sistemafutbol.registration;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
 
 public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> {
 
@@ -20,6 +21,12 @@ public interface InscripcionRepository extends JpaRepository<Inscripcion, Long> 
     boolean existsByJugador_IdJugadorAndEquipo_IdEquipoAndTorneo_IdTorneoAndEstado(
             Long idJugador,
             Long idEquipo,
+            Long idTorneo,
+            EstadoInscripcion estado
+    );
+
+    Optional<Inscripcion> findByJugador_IdJugadorAndTorneo_IdTorneoAndEstado(
+            Long idJugador,
             Long idTorneo,
             EstadoInscripcion estado
     );
