@@ -7,7 +7,6 @@ import com.andyjimenez.sistemafutbol.match.dto.PartidoRequest;
 import com.andyjimenez.sistemafutbol.match.dto.PartidoResponse;
 import com.andyjimenez.sistemafutbol.matchday.Jornada;
 import com.andyjimenez.sistemafutbol.matchday.JornadaService;
-import com.andyjimenez.sistemafutbol.participation.ParticipacionTorneo;
 import com.andyjimenez.sistemafutbol.participation.ParticipacionTorneoRepository;
 import com.andyjimenez.sistemafutbol.sancion.SancionService;
 import com.andyjimenez.sistemafutbol.team.Equipo;
@@ -19,20 +18,20 @@ import java.util.List;
 
 @Service
 public class PartidoService {
-    private final PartidoRespository partidoRespository;
+    private final PartidoRepository partidoRepository;
     private final JornadaService jornadaService;
     private final EquipoService equipoService;
     private final ParticipacionTorneoRepository participacionTorneoRepository;
     private final CorreccionResultadoRepository correccionResultadoRepository;
     private final SancionService sancionService;
 
-    public PartidoService(PartidoRespository partidoRespository,
+    public PartidoService(PartidoRepository partidoRepository,
                           JornadaService jornadaService,
                           EquipoService equipoService,
                           ParticipacionTorneoRepository participacionTorneoRepository,
                           CorreccionResultadoRepository correccionResultadoRepository,
                           SancionService sancionService) {
-        this.partidoRespository = partidoRespository;
+        this.partidoRepository = partidoRepository;
         this.jornadaService = jornadaService;
         this.equipoService = equipoService;
         this.participacionTorneoRepository = participacionTorneoRepository;
@@ -72,7 +71,7 @@ public class PartidoService {
         partido.setGolesLocal(null);
         partido.setGolesVisitante(null);
 
-        Partido partidoGuardado = partidoRespository.save(partido);
+        Partido partidoGuardado = partidoRepository.save(partido);
 
         return convertirAResponse(partidoGuardado);
     }
@@ -90,14 +89,14 @@ public class PartidoService {
     }
 
     public List<PartidoResponse> listarTodos(){
-        return partidoRespository.findAll()
+        return partidoRepository.findAll()
                 .stream()
                 .map(this::convertirAResponse)
                 .toList();
     }
 
     public Partido buscarPartidoPorId(Long id){
-        return partidoRespository.findById(id).orElseThrow(() -> new PartidoNoEncontradoException(id));
+        return partidoRepository.findById(id).orElseThrow(() -> new PartidoNoEncontradoException(id));
     }
 
     public PartidoResponse buscarPorId(Long id){
@@ -118,7 +117,7 @@ public class PartidoService {
         partido.setGolesVisitante(request.getGolesVisitante());
         partido.setEstado(EstadoPartido.JUGADO);
 
-        Partido partidoActualizado = partidoRespository.save(partido);
+        Partido partidoActualizado = partidoRepository.save(partido);
 
         sancionService.procesarSancionesPorPartido(partidoActualizado);
 
@@ -150,7 +149,7 @@ public class PartidoService {
         partido.setGolesLocal(resultadoRequest.getGolesLocal());
         partido.setGolesVisitante(resultadoRequest.getGolesVisitante());
 
-        Partido partidoActualizado = partidoRespository.save(partido);
+        Partido partidoActualizado = partidoRepository.save(partido);
 
         return convertirAResponse(partidoActualizado);
 
